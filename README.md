@@ -1,32 +1,75 @@
-# React + TypeScript + Vite
+# MonoTask — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A minimalist, black-and-white React + TypeScript frontend with semantic status colors, Radix UI primitives, Framer Motion micro-interactions, and a swappable mock/HTTP API transport layer.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+- **Framework:** Vite + React + TypeScript
+- **Styling:** Tailwind CSS v3 (monochrome light/dark tokens + semantic status colors)
+- **UI Primitives:** Radix UI (`Dialog`, `DropdownMenu`, `Tabs`) + custom accessible primitives
+- **Motion & Icons:** Framer Motion + Lucide React
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+## Folder Structure
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```text
+src/
+├── components/
+│   ├── ui/             # Reusable primitives (Button, Input, Badge, Checkbox, Dialog, Dropdown, Tabs)
+│   ├── BulkActionBar.tsx
+│   ├── CreateTodoModal.tsx
+│   ├── FilterBar.tsx
+│   ├── ListModals.tsx
+│   ├── TodoInspector.tsx
+│   └── TodoRow.tsx
+├── hooks/              # Data query & mutation hooks (useAuth, useTodos, useTodoDetail, useLists, useStats, useToast, useTheme)
+├── layouts/            # AppLayout (responsive sidebar) & AuthLayout
+├── lib/
+│   ├── api/
+│   │   ├── transport.ts      # Shared ApiTransport interface (.get, .post, .patch, .delete)
+│   │   ├── httpTransport.ts  # Real fetch adapter for Express backend
+│   │   ├── mockTransport.ts  # Route-matched localStorage mock adapter
+│   │   ├── seedData.ts       # Seed data for mock mode
+│   │   └── index.ts          # Unified API client built on top of transport
+│   ├── types.ts        # Shared entity and DTO types
+│   └── utils.ts        # Formatting and class helpers
+└── pages/              # AuthPage, TasksPage, StatsPage
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+---
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+To build for production:
+
+```bash
+npm run build
+```
+
+---
+
+## Mock Mode vs. Real Backend
+
+By default, the app runs in **mock mode** using `mockTransport` (backed by `localStorage`) so you can explore every feature immediately without a running server.
+
+- **Demo account (mock mode):** `alex@monotask.dev` / `password123` (or click **Enter Demo Workspace** on the sign-in screen).
+- Other seeded teammates for testing shared lists: `sam@monotask.dev`, `maya@monotask.dev`.
+
+### Connecting to Your Backend
+
+Copy `.env.example` to `.env` and switch `VITE_API_MODE` to `http`:
+
+```env
+VITE_API_MODE=http
+VITE_API_BASE_URL=http://localhost:3000/api
+```
+
+Because both `mockTransport` and `httpTransport` implement the same `ApiTransport` interface (`.get`, `.post`, `.patch`, `.delete`) and share one domain API layer in `src/lib/api/index.ts`, no hook or component code needs to change when switching to the live backend.
