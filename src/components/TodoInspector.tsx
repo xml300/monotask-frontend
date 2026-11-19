@@ -19,8 +19,21 @@ import { formatBytes, formatDateTime, formatDuration, formatTimerClock } from '.
 import { Badge } from './ui/Badge';
 import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
-import { Input, Select, Textarea } from './ui/Input';
+import { Input, Textarea } from './ui/Input';
+import { Select, type SelectOption } from './ui/Select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs';
+
+const PRIORITY_OPTIONS: SelectOption[] = [
+  { value: 'low', label: 'Low', dotClassName: 'bg-ink-muted/60' },
+  { value: 'medium', label: 'Medium', dotClassName: 'bg-status-warning' },
+  { value: 'high', label: 'High', dotClassName: 'bg-status-danger' },
+];
+
+const CHANNEL_OPTIONS: SelectOption[] = [
+  { value: 'email', label: 'Email' },
+  { value: 'push', label: 'Push' },
+  { value: 'webhook', label: 'Webhook' },
+];
 
 interface TodoInspectorProps {
   todoId: string | null;
@@ -190,35 +203,31 @@ export function TodoInspector({
                     <div>
                       <label className="mb-1 block text-[11px] font-medium text-ink-muted">Priority</label>
                       <Select
-                        className="w-full text-xs"
+                        ariaLabel="Task priority"
+                        className="w-full"
                         value={todo.priority}
-                        onChange={async (e) => {
-                          await onUpdateTodo(todo.id, { priority: e.target.value as Priority });
+                        options={PRIORITY_OPTIONS}
+                        onValueChange={async (v) => {
+                          await onUpdateTodo(todo.id, { priority: v as Priority });
                           await refresh();
                         }}
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </Select>
+                      />
                     </div>
                     <div>
                       <label className="mb-1 block text-[11px] font-medium text-ink-muted">List</label>
                       <Select
-                        className="w-full text-xs"
+                        ariaLabel="Task list"
+                        className="w-full"
                         value={todo.listId || ''}
-                        onChange={async (e) => {
-                          await onUpdateTodo(todo.id, { listId: e.target.value || null });
+                        options={[
+                          { value: '', label: 'Inbox' },
+                          ...lists.map((l) => ({ value: l.id, label: l.name })),
+                        ]}
+                        onValueChange={async (v) => {
+                          await onUpdateTodo(todo.id, { listId: v || null });
                           await refresh();
                         }}
-                      >
-                        <option value="">Inbox</option>
-                        {lists.map((l) => (
-                          <option key={l.id} value={l.id}>
-                            {l.name}
-                          </option>
-                        ))}
-                      </Select>
+                      />
                     </div>
                     <div>
                       <label className="mb-1 block text-[11px] font-medium text-ink-muted">Due Date</label>
@@ -406,17 +415,15 @@ export function TodoInspector({
 
                       <div className="flex gap-2">
                         <Select
-                          className="flex-1 text-xs"
+                          ariaLabel="Select prerequisite task"
+                          className="flex-1"
                           value={depCandidate}
-                          onChange={(e) => setDepCandidate(e.target.value)}
-                        >
-                          <option value="">Select prerequisite task...</option>
-                          {availableDeps.map((t) => (
-                            <option key={t.id} value={t.id}>
-                              {t.title}
-                            </option>
-                          ))}
-                        </Select>
+                          options={[
+                            { value: '', label: 'Select prerequisite task...' },
+                            ...availableDeps.map((t) => ({ value: t.id, label: t.title })),
+                          ]}
+                          onValueChange={setDepCandidate}
+                        />
                         <Button
                           size="sm"
                           disabled={!depCandidate}
@@ -469,14 +476,12 @@ export function TodoInspector({
                           onChange={(e) => setRemindAt(e.target.value)}
                         />
                         <Select
-                          className="text-xs"
+                          ariaLabel="Reminder channel"
+                          className="w-[106px]"
                           value={remindChannel}
-                          onChange={(e) => setRemindChannel(e.target.value as ReminderChannel)}
-                        >
-                          <option value="email">Email</option>
-                          <option value="push">Push</option>
-                          <option value="webhook">Webhook</option>
-                        </Select>
+                          options={CHANNEL_OPTIONS}
+                          onValueChange={(v) => setRemindChannel(v as ReminderChannel)}
+                        />
                         <Button
                           size="sm"
                           disabled={!remindAt}

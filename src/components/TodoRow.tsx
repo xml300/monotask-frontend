@@ -1,8 +1,10 @@
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Archive,
   ArchiveRestore,
   Calendar,
+  Check,
+  CheckSquare,
   Clock,
   MoreHorizontal,
   Repeat,
@@ -27,7 +29,6 @@ interface TodoRowProps {
   isTrash?: boolean;
   isArchived?: boolean;
   selected: boolean;
-  selectionActive: boolean;
   onSelectToggle: (id: string) => void;
   onToggleComplete: (id: string) => void;
   onInspect: (id: string) => void;
@@ -39,10 +40,10 @@ interface TodoRowProps {
   onPermanentDelete: (id: string) => void;
 }
 
-const PRIORITY_STYLES = {
-  high: { dot: 'bg-status-danger', label: 'High', badge: 'danger' as const },
-  medium: { dot: 'bg-status-warning', label: 'Med', badge: 'warning' as const },
-  low: { dot: 'bg-ink-muted/60', label: 'Low', badge: 'default' as const },
+const PRIORITY_DOT = {
+  high: 'bg-status-danger',
+  medium: 'bg-status-warning',
+  low: 'bg-ink-muted/60',
 };
 
 export function TodoRow({
@@ -51,7 +52,6 @@ export function TodoRow({
   isTrash,
   isArchived,
   selected,
-  selectionActive,
   onSelectToggle,
   onToggleComplete,
   onInspect,
@@ -64,7 +64,16 @@ export function TodoRow({
 }: TodoRowProps) {
   const overdue = isOverdue(todo.dueDate, todo.completed);
   const dueToday = !overdue && isDueToday(todo.dueDate) && !todo.completed;
-  const pStyle = PRIORITY_STYLES[todo.priority];
+
+  const handleRowClick = (e: React.MouseEvent) => {
+    if (isTrash) return;
+    if (e.metaKey || e.ctrlKey) {
+      e.preventDefault();
+      onSelectToggle(todo.id);
+      return;
+    }
+    onInspect(todo.id);
+  };
 
   return (
     <motion.div
@@ -73,33 +82,29 @@ export function TodoRow({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -12 }}
       transition={{ duration: 0.18, ease: 'easeOut' }}
-      onClick={() => !isTrash && onInspect(todo.id)}
+      onClick={handleRowClick}
       className={cn(
-        'group flex items-start gap-3 rounded-xl border px-3.5 py-3 transition-all',
+        'group relative flex items-start gap-3 overflow-hidden rounded-xl border px-3.5 py-3 transition-all',
         selected
-          ? 'border-ink bg-surface-subtle'
+          ? 'border-ink bg-surface-subtle shadow-hairline'
           : 'border-line bg-surface hover:border-line-strong hover:bg-surface-subtle/50',
         !isTrash && 'cursor-pointer'
       )}
     >
-      {/* Bulk select checkbox */}
-      {!isTrash && (
-        <div
-          className={cn(
-            'mt-0.5 transition-opacity',
-            selectionActive || selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          )}
-        >
-          <Checkbox
-            variant="select"
-            checked={selected}
-            onChange={() => onSelectToggle(todo.id)}
-            ariaLabel={`Select ${todo.title}`}
+      {/* Linear-style left accent bar when selected */}
+      <AnimatePresence>
+        {selected && (
+          <motion.span
+            initial={{ scaleY: 0 }}
+            animate={{ scaleY: 1 }}
+            exit={{ scaleY: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-y-0 left-0 w-[3px] origin-center bg-ink"
           />
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
-      {/* Task completion checkbox */}
+      {/* Single clean completion circle on the left */}
       {!isTrash && (
         <div className="mt-0.5">
           <Checkbox
@@ -117,7 +122,7 @@ export function TodoRow({
           <span
             className={cn(
               'h-2 w-2 shrink-0 rounded-full',
-              todo.completed ? 'bg-status-success' : pStyle.dot
+              todo.completed ? 'bg-status-success' : PRIORITY_DOT[todo.priority]
             )}
             title={`Priority: ${todo.priority}`}
           />
@@ -148,9 +153,7 @@ export function TodoRow({
             </Badge>
           )}
 
-          {todo.priority === 'high' && !todo.completed && (
-            <Badge variant="danger">High</Badge>
-          )}
+          {todo.priority === 'high' && !todo.completed && <Badge variant="danger">High</Badge>}
 
           {todo.tags.map((tag) => (
             <span
@@ -163,8 +166,25 @@ export function TodoRow({
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
+      {/* Right side: subtle selected pill + overflow menu */}
+      <div className="flex shrink-0 items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+        <AnimatePresence>
+          {selected && !isTrash && (
+            <motion.button
+              type="button"
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.85 }}
+              onClick={() => onSelectToggle(todo.id)}
+              className="inline-flex items-center gap-1 rounded-full bg-ink px-2 py-0.5 text-[10px] font-medium text-surface"
+              title="Click to deselect"
+            >
+              <Check className="h-2.5 w-2.5" />
+              Selected
+            </motion.button>
+          )}
+        </AnimatePresence>
+
         {isTrash ? (
           <>
             <button
@@ -196,6 +216,11 @@ export function TodoRow({
               </button>
             </DropdownTrigger>
             <DropdownContent align="end">
+              <DropdownItem onClick={() => onSelectToggle(todo.id)}>
+                <CheckSquare className="h-3.5 w-3.5" />
+                {selected ? 'Deselect' : 'Select task'}
+              </DropdownItem>
+              <DropdownSeparator />
               <DropdownItem onClick={() => onSnooze(todo.id, '1d')}>
                 <Clock className="h-3.5 w-3.5" />
                 Snooze +1 day

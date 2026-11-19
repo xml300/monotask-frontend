@@ -5,7 +5,13 @@ import type { List } from '../lib/types';
 import { Badge } from './ui/Badge';
 import { Button } from './ui/Button';
 import { Dialog, DialogContent } from './ui/Dialog';
-import { Input, Select } from './ui/Input';
+import { Input } from './ui/Input';
+import { Select, type SelectOption } from './ui/Select';
+
+const ROLE_OPTIONS: SelectOption[] = [
+  { value: 'editor', label: 'Editor' },
+  { value: 'viewer', label: 'Viewer' },
+];
 
 interface CreateListModalProps {
   open: boolean;
@@ -101,13 +107,12 @@ export function ManageMembersModal({ list, onClose, onDeleteList }: ManageMember
               className="flex-1"
             />
             <Select
+              ariaLabel="Member role"
+              className="w-[104px]"
               value={role}
-              onChange={(e) => setRole(e.target.value as 'editor' | 'viewer')}
-              aria-label="Member role"
-            >
-              <option value="editor">Editor</option>
-              <option value="viewer">Viewer</option>
-            </Select>
+              options={ROLE_OPTIONS}
+              onValueChange={(v) => setRole(v as 'editor' | 'viewer')}
+            />
             <Button type="submit" size="md">
               <UserPlus className="h-3.5 w-3.5" />
               Add
@@ -129,16 +134,12 @@ export function ManageMembersModal({ list, onClose, onDeleteList }: ManageMember
                   ) : (
                     <>
                       <Select
-                        aria-label="Change role"
-                        className="h-7 text-xs"
+                        ariaLabel="Change role"
+                        className="h-7 w-[96px]"
                         value={m.role}
-                        onChange={(e) =>
-                          updateMemberRole(m.userId, e.target.value as 'editor' | 'viewer')
-                        }
-                      >
-                        <option value="editor">Editor</option>
-                        <option value="viewer">Viewer</option>
-                      </Select>
+                        options={ROLE_OPTIONS}
+                        onValueChange={(v) => updateMemberRole(m.userId, v as 'editor' | 'viewer')}
+                      />
                       <button
                         type="button"
                         onClick={() => removeMember(m.userId)}

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import type { CreateTodoInput, List, Priority, RecurrenceFrequency } from '../lib/types';
 import { Button } from './ui/Button';
 import { Dialog, DialogContent } from './ui/Dialog';
-import { Input, Select, Textarea } from './ui/Input';
+import { Input, Textarea } from './ui/Input';
+import { Select, type SelectOption } from './ui/Select';
 
 interface CreateTodoModalProps {
   open: boolean;
@@ -11,6 +12,20 @@ interface CreateTodoModalProps {
   defaultListId?: string | null;
   onSubmit: (input: CreateTodoInput) => Promise<unknown>;
 }
+
+const PRIORITY_OPTIONS: SelectOption[] = [
+  { value: 'low', label: 'Low', dotClassName: 'bg-ink-muted/60' },
+  { value: 'medium', label: 'Medium', dotClassName: 'bg-status-warning' },
+  { value: 'high', label: 'High', dotClassName: 'bg-status-danger' },
+];
+
+const RECURRENCE_OPTIONS: SelectOption[] = [
+  { value: '', label: 'Does not repeat' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'yearly', label: 'Yearly' },
+];
 
 export function CreateTodoModal({
   open,
@@ -27,6 +42,11 @@ export function CreateTodoModal({
   const [tagsRaw, setTagsRaw] = useState('');
   const [recurrenceFreq, setRecurrenceFreq] = useState<RecurrenceFrequency | ''>('');
   const [submitting, setSubmitting] = useState(false);
+
+  const listOptions: SelectOption[] = [
+    { value: '', label: 'Inbox (Personal)' },
+    ...lists.map((l) => ({ value: l.id, label: l.name })),
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,15 +117,9 @@ export function CreateTodoModal({
                 id="todo-list"
                 className="w-full"
                 value={listId}
-                onChange={(e) => setListId(e.target.value)}
-              >
-                <option value="">Inbox (Personal)</option>
-                {lists.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name}
-                  </option>
-                ))}
-              </Select>
+                options={listOptions}
+                onValueChange={setListId}
+              />
             </div>
 
             <div>
@@ -116,12 +130,9 @@ export function CreateTodoModal({
                 id="todo-priority"
                 className="w-full"
                 value={priority}
-                onChange={(e) => setPriority(e.target.value as Priority)}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </Select>
+                options={PRIORITY_OPTIONS}
+                onValueChange={(v) => setPriority(v as Priority)}
+              />
             </div>
           </div>
 
@@ -146,14 +157,9 @@ export function CreateTodoModal({
                 id="todo-recurrence"
                 className="w-full"
                 value={recurrenceFreq}
-                onChange={(e) => setRecurrenceFreq(e.target.value as RecurrenceFrequency | '')}
-              >
-                <option value="">Does not repeat</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </Select>
+                options={RECURRENCE_OPTIONS}
+                onValueChange={(v) => setRecurrenceFreq(v as RecurrenceFrequency | '')}
+              />
             </div>
           </div>
 

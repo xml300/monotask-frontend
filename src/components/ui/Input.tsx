@@ -29,18 +29,3 @@ export const Textarea = React.forwardRef<
   />
 ));
 Textarea.displayName = 'Textarea';
-
-export const Select = React.forwardRef<
-  HTMLSelectElement,
-  React.SelectHTMLAttributes<HTMLSelectElement>
->(({ className, ...props }, ref) => (
-  <select
-    ref={ref}
-    className={cn(
-      'flex h-9 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-sm text-ink transition-colors focus:border-ink focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
-      className
-    )}
-    {...props}
-  />
-));
-Select.displayName = 'Select';

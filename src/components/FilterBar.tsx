@@ -3,7 +3,8 @@ import { Download, Search, Upload } from 'lucide-react';
 import type { CreateTodoInput, Priority, TodoFilters } from '../lib/types';
 import { Button } from './ui/Button';
 import { Dropdown, DropdownContent, DropdownItem, DropdownTrigger } from './ui/Dropdown';
-import { Input, Select } from './ui/Input';
+import { Input } from './ui/Input';
+import { Select, type SelectOption } from './ui/Select';
 
 interface FilterBarProps {
   filters: TodoFilters;
@@ -11,6 +12,26 @@ interface FilterBarProps {
   onExport: (format: 'json' | 'csv' | 'ics') => void;
   onImport: (items: CreateTodoInput[]) => void;
 }
+
+const PRIORITY_OPTIONS: SelectOption[] = [
+  { value: '', label: 'All priorities' },
+  { value: 'high', label: 'High priority', dotClassName: 'bg-status-danger' },
+  { value: 'medium', label: 'Medium priority', dotClassName: 'bg-status-warning' },
+  { value: 'low', label: 'Low priority', dotClassName: 'bg-ink-muted/60' },
+];
+
+const STATUS_OPTIONS: SelectOption[] = [
+  { value: '', label: 'All status' },
+  { value: 'active', label: 'Open', dotClassName: 'bg-status-info' },
+  { value: 'completed', label: 'Completed', dotClassName: 'bg-status-success' },
+];
+
+const SORT_OPTIONS: SelectOption[] = [
+  { value: 'createdAt:desc', label: 'Newest first' },
+  { value: 'dueDate:asc', label: 'Due soonest' },
+  { value: 'priority:desc', label: 'Highest priority' },
+  { value: 'title:asc', label: 'Title A–Z' },
+];
 
 export function FilterBar({ filters, onChange, onExport, onImport }: FilterBarProps) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -46,55 +67,46 @@ export function FilterBar({ filters, onChange, onExport, onImport }: FilterBarPr
       </div>
 
       <Select
-        aria-label="Filter by priority"
+        ariaLabel="Filter by priority"
+        className="w-[148px]"
         value={filters.priority || ''}
-        onChange={(e) =>
+        options={PRIORITY_OPTIONS}
+        onValueChange={(v) =>
           onChange({
             ...filters,
-            priority: (e.target.value || undefined) as Priority | undefined,
+            priority: (v || undefined) as Priority | undefined,
           })
         }
-      >
-        <option value="">All priorities</option>
-        <option value="high">High priority</option>
-        <option value="medium">Medium priority</option>
-        <option value="low">Low priority</option>
-      </Select>
+      />
 
       <Select
-        aria-label="Filter by status"
+        ariaLabel="Filter by status"
+        className="w-[132px]"
         value={
           filters.completed === undefined ? '' : filters.completed ? 'completed' : 'active'
         }
-        onChange={(e) =>
+        options={STATUS_OPTIONS}
+        onValueChange={(v) =>
           onChange({
             ...filters,
-            completed:
-              e.target.value === '' ? undefined : e.target.value === 'completed',
+            completed: v === '' ? undefined : v === 'completed',
           })
         }
-      >
-        <option value="">All status</option>
-        <option value="active">Open</option>
-        <option value="completed">Completed</option>
-      </Select>
+      />
 
       <Select
-        aria-label="Sort tasks"
+        ariaLabel="Sort tasks"
+        className="w-[148px]"
         value={`${filters.sortBy || 'createdAt'}:${filters.order || 'desc'}`}
-        onChange={(e) => {
-          const [sortBy, order] = e.target.value.split(':') as [
+        options={SORT_OPTIONS}
+        onValueChange={(v) => {
+          const [sortBy, order] = v.split(':') as [
             TodoFilters['sortBy'],
             TodoFilters['order'],
           ];
           onChange({ ...filters, sortBy, order });
         }}
-      >
-        <option value="createdAt:desc">Newest first</option>
-        <option value="dueDate:asc">Due soonest</option>
-        <option value="priority:desc">Highest priority</option>
-        <option value="title:asc">Title A–Z</option>
-      </Select>
+      />
 
       <Dropdown>
         <DropdownTrigger asChild>

@@ -3,7 +3,19 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, Clock, Flame, Layers } from 'lucide-react';
 import { useStats } from '../hooks/useStats';
 import { formatDuration } from '../lib/utils';
-import { Select } from '../components/ui/Input';
+import { Select, type SelectOption } from '../components/ui/Select';
+
+const RANGE_OPTIONS: SelectOption[] = [
+  { value: '7d', label: 'Last 7 days' },
+  { value: '30d', label: 'Last 30 days' },
+  { value: '90d', label: 'Last 90 days' },
+];
+
+const GROUP_BY_OPTIONS: SelectOption[] = [
+  { value: 'list', label: 'By List' },
+  { value: 'tag', label: 'By Tag' },
+  { value: 'day', label: 'By Day' },
+];
 
 export function StatsPage() {
   const [range, setRange] = useState<'7d' | '30d' | '90d'>('7d');
@@ -23,14 +35,12 @@ export function StatsPage() {
           </p>
         </div>
         <Select
-          aria-label="Date range"
+          ariaLabel="Date range"
+          className="w-[140px]"
           value={range}
-          onChange={(e) => setRange(e.target.value as '7d' | '30d' | '90d')}
-        >
-          <option value="7d">Last 7 days</option>
-          <option value="30d">Last 30 days</option>
-          <option value="90d">Last 90 days</option>
-        </Select>
+          options={RANGE_OPTIONS}
+          onValueChange={(v) => setRange(v as '7d' | '30d' | '90d')}
+        />
       </div>
 
       {/* Summary Metrics */}
@@ -135,14 +145,12 @@ export function StatsPage() {
             </div>
           </div>
           <Select
-            aria-label="Group time by"
+            ariaLabel="Group time by"
+            className="w-[116px]"
             value={timeGroupBy}
-            onChange={(e) => setTimeGroupBy(e.target.value as 'list' | 'tag' | 'day')}
-          >
-            <option value="list">By List</option>
-            <option value="tag">By Tag</option>
-            <option value="day">By Day</option>
-          </Select>
+            options={GROUP_BY_OPTIONS}
+            onValueChange={(v) => setTimeGroupBy(v as 'list' | 'tag' | 'day')}
+          />
         </div>
 
         {!timeStats || timeStats.breakdown.length === 0 ? (

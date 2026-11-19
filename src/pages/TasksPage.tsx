@@ -196,7 +196,6 @@ export function TasksPage({
                 isTrash={isTrash}
                 isArchived={isArchived}
                 selected={selectedIds.includes(todo.id)}
-                selectionActive={selectedIds.length > 0}
                 onSelectToggle={toggleSelect}
                 onToggleComplete={async (id) => {
                   await toggleTodo(id);
