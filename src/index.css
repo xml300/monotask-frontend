@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --surface: 0 0% 100%;
+    --surface-subtle: 0 0% 97.5%;
+    --surface-elevated: 0 0% 100%;
+
+    --ink: 0 0% 5%;
+    --ink-secondary: 0 0% 34%;
+    --ink-muted: 0 0% 54%;
+
+    --line: 0 0% 90%;
+    --line-strong: 0 0% 78%;
+
+    /* Semantic status colors only */
+    --status-success: 152 62% 36%;
+    --status-warning: 36 90% 44%;
+    --status-danger: 0 74% 50%;
+    --status-info: 215 84% 48%;
+  }
+
+  .dark {
+    --surface: 0 0% 4%;
+    --surface-subtle: 0 0% 8%;
+    --surface-elevated: 0 0% 10%;
+
+    --ink: 0 0% 96%;
+    --ink-secondary: 0 0% 68%;
+    --ink-muted: 0 0% 48%;
+
+    --line: 0 0% 16%;
+    --line-strong: 0 0% 28%;
+
+    --status-success: 152 60% 48%;
+    --status-warning: 38 92% 56%;
+    --status-danger: 0 76% 60%;
+    --status-info: 215 90% 62%;
+  }
+
+  * {
+    border-color: hsl(var(--line));
+  }
+
+  body {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: hsl(var(--surface));
+    color: hsl(var(--ink));
+  }
+}
+
+/* Subtle custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--line-strong));
+  border-radius: 999px;
+}
